@@ -1,10 +1,11 @@
 """
-- CS2911 - 0NN
-- Fall 2020
-- Lab 9
+- CS2911 - 011
+- Fall 2021
+- Lab 9 - RSA Encryption
 - Names:
-  - 
-  -
+  - Nathan Cernik
+  - Ben Fouch
+  - Aidan Regan
 
 16-bit RSA
 
@@ -106,9 +107,9 @@ def compute_checksum_interactive():
 
     message = input('Please enter the message to be checksummed: ')
 
-    hash = compute_checksum(message)
-    print('Hash:', "{0:04x}".format(hash))
-    cipher = apply_key(priv, hash)
+    hash_code = compute_checksum(message)
+    print('Hash:', "{0:04x}".format(hash_code))
+    cipher = apply_key(priv, hash_code)
     print('Encrypted Hash:', "{0:04x}".format(cipher))
 
 
@@ -145,7 +146,7 @@ def encrypt_message_interactive():
     print("Encrypted message:", encrypted)
 
 
-def decrypt_message_interactive(priv = None):
+def decrypt_message_interactive(priv=None):
     """
     Decrypt a message
     """
@@ -158,7 +159,7 @@ def decrypt_message_interactive(priv = None):
         enc_string = encrypted[i:i + 4]
         enc = int(enc_string, 16)
         dec = apply_key(priv, enc)
-        if dec >= 0 and dec < 256:
+        if 0 <= dec < 256:
             message += chr(dec)
         else:
             print('Warning: Could not decode encrypted entity: ' + enc_string)
@@ -190,7 +191,7 @@ def enter_public_key_interactive():
     print('(Using public exponent = ' + str(PUBLIC_EXPONENT) + ')')
     string_modulus = input('Please enter the modulus (decimal): ')
     modulus = int(string_modulus)
-    return (PUBLIC_EXPONENT, modulus)
+    return PUBLIC_EXPONENT, modulus
 
 
 def enter_key_interactive(key_type):
@@ -205,7 +206,7 @@ def enter_key_interactive(key_type):
     exponent = int(string_exponent)
     string_modulus = input('Please enter the modulus (decimal): ')
     modulus = int(string_modulus)
-    return (exponent, modulus)
+    return exponent, modulus
 
 
 def compute_checksum(string):
@@ -244,45 +245,94 @@ def compute_checksum(string):
 
 def create_keys():
     """
-    Create the public and private keys.
-
-    :return: the keys as a three-tuple: (e,d,n)
     """
+    e = PUBLIC_EXPONENT
+    p = prime_generator(e)
+    q = prime_generator(e)
+    while p == q:
+        q = prime_generator(e)
+    n = p * q
+    z = (p - 1) * (q - 1)
+    d = apply_euclid_method(e, z)
+    return e, d, n
 
-    pass  # Delete this line and complete this method
+
+def prime_generator(e):
+    """
+    """
+    random_num = random_num_generator()
+    while (not is_num_co_prime(random_num, e)) | (not is_prime(random_num)):
+        return random_num_generator()
+
+
+def random_num_generator():
+    """
+    """
+    return random.randint(MIN_PRIME, MAX_PRIME) | 1
+
+
+def is_prime(num):
+    """
+    """
+    for i in range(2, num):
+        if num % i == 0:
+            return False
+    return True
+
+
+def is_num_co_prime(num, e):
+    """
+    """
+    return (num - 1) % e != 0
+
+
+def apply_euclid_method(e, z):
+    """
+    """
+    d = 0
+    r = z
+    newd = 1
+    newr = e
+    while newr != 0:
+        quotient = r // newr
+        (d, newd) = (newd, d - quotient * newd)
+        (r, newr) = (newr, r - quotient * newr)
+    if r > 1:
+        return "a is not invertible"
+    if d < 0:
+        d = d + z
+    return d
 
 
 def apply_key(key, m):
     """
-    Apply the key, given as a tuple (e,n) or (d,n) to the message.
-
-    This can be used both for encryption and decryption.
-
-    :param tuple key: (e,n) or (d,n)
-    :param int m: the message as a number 1 < m < n (roughly)
-    :return: the message with the key applied. For example,
-             if given the public key and a message, encrypts the message
-             and returns the ciphertext.
     """
-
-    pass  # Delete this line and complete this method
+    k, n = key
+    if 37249 < n < 65025:
+        return (m ** k) % n
+    else:
+        print("Incorrect Public Key Value.")
+        exit()
 
 
 def break_key(pub):
     """
-    Break a key.  Given the public key, find the private key.
-    Factorizes the modulus n to find the prime numbers p and q.
-
-    You can follow the steps in the "optional" part of the in-class
-    exercise.
-
-    :param pub: a tuple containing the public key (e,n)
-    :return: a tuple containing the private key (d,n)
     """
-    pass  # Delete this line and complete this method
+    e, n = pub
+    p, q = get_prime_factors(n)
+    z = (p - 1) * (q - 1)
+    d = apply_euclid_method(e, z)
+    return d, n
 
 
-# Your code and additional functions go here. (Replace this line.)
+def get_prime_factors(n):
+    """
+    """
+    for i in range(MIN_PRIME, MAX_PRIME + 1, 2):
+        if is_prime(i) & ((n % i) == 0):
+            num = n // i
+            return i, num
+
 
 # ---------------------------------------
 # Do not modify code below this line
@@ -298,7 +348,7 @@ def get_public_key(key_pair):
     :return: (e,n)
     """
 
-    return (key_pair[0], key_pair[2])
+    return key_pair[0], key_pair[2]
 
 
 def get_private_key(key_pair):
@@ -310,7 +360,7 @@ def get_private_key(key_pair):
     :return: (d,n)
     """
 
-    return (key_pair[1], key_pair[2])
+    return key_pair[1], key_pair[2]
 
 
 main()
