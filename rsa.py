@@ -10,37 +10,35 @@
 16-bit RSA
 
 Introduction: (Describe the lab in your own words)
-
-
-
-
+This lab is to teach us how RSA encryption and brute force attacks work.
 
 Question 1: RSA Security
 In this lab, Trudy is able to find the private key from the public key. Why is this not a problem for RSA in practice?
-
-
-
-
+The keys in this lab are much smaller than ones used in real practice. These can be broken quickly while the real keys
+used in proactive are computationally infeasible to break
 
 Question 2: Critical Step(s)
-When creating a key, Bob follows certain steps. Trudy follows other steps to break a key. What is the difference between Bob’s steps and Trudy’s so that Bob is able to run his steps on large numbers, but Trudy cannot run her steps on large numbers?
+When creating a key, Bob follows certain steps. Trudy follows other steps to break a key. What is the difference between
+ Bob’s steps and Trudy’s so that Bob is able to run his steps on large numbers, but Trudy cannot run her steps on large
+ numbers?
 
-
-
+Trudy does not know as much as bob does. He is able to fill out more of the equation and simply get results, while trudy
+has to try multiple iterations for the equation to guess what the correct answer is. If she were to try that with large
+numbers, it would never finish
 
 Checksum Activity:
 Provide a dicussion of your experiences as described in the activity.  Be sure to answer all questions.
-
-
-
-
+How can trudy be stopped in this instance:
+The checksum here only adds the unicode value for each char in the string, that allows for any of the chars to be moved
+around. This would give a new value for the message, but would have the same checksum.
+She can be stopped from doing this by us implementing a new checksum algorithm. Possibly one that mulltiples the
+position index by the value of the char, and then adding it. This would still in theroy allow for other messages, but
+very rarely any that would make any sense
 
 Summary: (Summarize your experience with the lab, what you learned, what you liked,what you disliked, and any suggestions you have for improvement)
-
-
-
-
-
+This was a fun lab. It was definitely needed to help the understanding of how the algorithms work. It can be hard to
+understand how this all works until you try to implement it. We dont have any suggestions, the proved code was a great
+starting place for the lab and helped to keep us focused on the parts that actually related to the course work.
 """
 
 import random
@@ -245,6 +243,7 @@ def compute_checksum(string):
 
 def create_keys():
     """
+    :Author: Nate Cernik
     """
     e = PUBLIC_EXPONENT
     p = prime_generator(e)
@@ -259,6 +258,7 @@ def create_keys():
 
 def prime_generator(e):
     """
+    :Author: Aiden Regan
     """
     random_num = random_num_generator()
     while (not is_num_co_prime(random_num, e)) | (not is_prime(random_num)):
@@ -267,12 +267,14 @@ def prime_generator(e):
 
 def random_num_generator():
     """
+    :Author: Aiden Regan
     """
     return random.randint(MIN_PRIME, MAX_PRIME) | 1
 
 
 def is_prime(num):
     """
+    :Author: Aiden Regan
     """
     for i in range(2, num):
         if num % i == 0:
@@ -282,12 +284,14 @@ def is_prime(num):
 
 def is_num_co_prime(num, e):
     """
+    :Author: Aiden Regan
     """
     return (num - 1) % e != 0
 
 
 def apply_euclid_method(e, z):
     """
+    :Author: Nate Cernik
     """
     d = 0
     r = z
@@ -306,6 +310,7 @@ def apply_euclid_method(e, z):
 
 def apply_key(key, m):
     """
+    :Author: Ben Fouch
     """
     k, n = key
     if 37249 < n < 65025:
@@ -317,6 +322,7 @@ def apply_key(key, m):
 
 def break_key(pub):
     """
+    :Author: Ben Fouch
     """
     e, n = pub
     p, q = get_prime_factors(n)
@@ -327,6 +333,7 @@ def break_key(pub):
 
 def get_prime_factors(n):
     """
+    :Author: Nate Cernik
     """
     for i in range(MIN_PRIME, MAX_PRIME + 1, 2):
         if is_prime(i) & ((n % i) == 0):
